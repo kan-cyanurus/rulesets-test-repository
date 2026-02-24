@@ -1,0 +1,21 @@
+name: test
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  check1: 
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: check1 test
+        run: exit 1
+
+  check2:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: check2 test
+        run: exit 0
