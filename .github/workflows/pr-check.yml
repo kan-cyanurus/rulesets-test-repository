@@ -13,7 +13,7 @@ jobs:
       - uses: dorny/paths-filter@v3
         id: changes
         with:
-          filter: |
+          filters: |
             migration:
               - 'migration/**'
         
