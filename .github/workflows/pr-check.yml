@@ -26,7 +26,3 @@ jobs:
         if: steps.check.outputs.should_run == 'true'
         run: |
           echo "Workを実行します"
-
-    steps:
-      - name: check2 test
-        run: exit 0
