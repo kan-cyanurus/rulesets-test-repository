@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: dony/paths-filter@v3
+      - uses: dorny/paths-filter@v3
         id: changes
         with:
           filter: |
