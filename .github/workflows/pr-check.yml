@@ -6,16 +6,23 @@ on:
       - main
 
 jobs:
-  check1: 
+  check1:
     runs-on: ubuntu-latest
 
     steps:
-      - name: check1 test
-        run: exit 0
+      - uses: dorny/paths-filter@v3
+        id: changes
+        with:
+          filters: |
+            migration:
+              - 'migration/**'
+        
+      - name: check
+        id: check
+        run: |
+          echo "should_run=${{ !contains(github.event.pull_request.title, 'Revert') && steps.changes.outputs.migration }}" >> "$GITHUB_OUTPUT"
 
-  check2:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: check2 test
-        run: exit 0
+      - name: Work
+        if: steps.check.outputs.should_run == 'true'
+        run: |
+          echo "Workを実行します"
