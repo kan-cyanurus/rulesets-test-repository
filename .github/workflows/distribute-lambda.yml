@@ -1,0 +1,105 @@
+name: Deploy Changed Lambdas
+
+on:
+  pull_request:
+    branches:
+      - develop
+      - release
+      - master
+    types:
+      - closed
+    paths:
+      # Lambda関数のディレクトリパターン
+      - '*gf-lmb-*/**'
+      - 'gdcm-lmb-*/**'
+      - 'tfleet-id__batch-non-update-vehicle/**'
+      - 'tfleet-id__tcjp-device-deactivate/**'
+      - 'tfleet-id__tcjp--pipe-to-cold-datastore/**'
+
+env:
+  AWS_REGION: ${{ vars.APP_REGION }}
+  BRANCH_BASE: ${{ github.base_ref }}
+
+permissions:
+  id-token: write # OIDC（OpenID Connect）による認証情報の発行を許可
+  contents: read # リポジトリの内容を読み取る権限を付与
+
+# 同じブランチ内で同時実行制御の設定
+concurrency:
+  group: lambda-deploy-${{ github.base_ref }}
+  cancel-in-progress: false
+
+jobs:
+  detect-changes:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    if: ${{ (github.base_ref == 'develop' || github.base_ref == 'release' || github.base_ref == 'master') && (github.event.pull_request.merged == true) }}
+    outputs:
+      changed: ${{ steps.filter.outputs.changes }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: filter
+        # 差分のあるlambdaファイルを検出
+        uses: dorny/paths-filter@v3
+        with:
+          filters: .github/lambda-deploy-def-map.yml
+
+      # OIDC_ROLEの設定
+      - name: Set OIDC_ROLE
+        run: |
+          if [ "$BRANCH_BASE" = "develop" ]; then
+            echo "OIDC_ROLE=${{ vars.OIDC_ROLE_DEV }}" >> $GITHUB_ENV
+          elif [ "$BRANCH_BASE" = "release" ]; then
+            echo "OIDC_ROLE=${{ vars.OIDC_ROLE_STG }}" >> $GITHUB_ENV
+          elif [ "$BRANCH_BASE" = "master" ]; then
+            echo "OIDC_ROLE=${{ vars.OIDC_ROLE_PRD }}" >> $GITHUB_ENV
+          else
+            echo "OIDC_ROLE=" >> $GITHUB_ENV
+          fi
+
+  deploy:
+    needs: detect-changes
+    if: ${{ needs.detect-changes.outputs.changed != '' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    strategy:
+      matrix:
+        lambda: ${{ fromJson(needs.detect-changes.outputs.changed) }}
+    env:
+      LAMBDA_NAME: ${{ matrix.lambda }}
+    steps:
+      - uses: actions/checkout@v4
+
+      # OIDCを使用してAWS認証情報を設定
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: $OIDC_ROLE
+          aws-region: $AWS_REGION
+          role-session-name: github-actions-distribute-lambda
+
+      # Lambdaのハッシュ値取得
+      - name: Get Lambda hash
+        id: lambda_hash
+        run: |
+          HASH=$(aws lambda get-function --function-name "$LAMBDA_NAME" --query 'Configuration.CodeSha256' --output text)
+          echo "HASH=$HASH" >> $GITHUB_ENV
+
+      # Lambdaのデプロイ処理
+      - name: Deploy Lambda (${{ matrix.lambda }})
+        run: |
+          aws lambda update-function-code --function-name "$LAMBDA_NAME" --zip-file fileb://function.zip
+          if [ "$LAMBDA_NAME" = "tfleet-id__grab-data-ingest-lambda" ] || [ "$LAMBDA_NAME" = "tfleet-id__tcjp--pipe-to-cold-datastore" ]; then
+            aws lambda update-function-code --function-name "${LAMBDA_NAME}-s3" --zip-file fileb://function.zip
+          fi
+
+      # デプロイ後のLambdaのハッシュ値取得と比較
+      - name: Verify Lambda deployment
+        run: |
+          DEPLOYED_HASH=$(aws lambda get-function --function-name "$LAMBDA_NAME" --query 'Configuration.CodeSha256' --output text)
+          if [ "$HASH" = "$DEPLOYED_HASH" ]; then
+            echo "Error: Lambda deployment failed for $LAMBDA_NAME. Hash did not change."
+            exit 1
+          else
+            echo "Lambda deployment succeeded for $LAMBDA_NAME. Hash updated."
+          fi
