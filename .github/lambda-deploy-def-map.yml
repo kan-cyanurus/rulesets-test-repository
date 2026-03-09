@@ -1,0 +1,2 @@
+gf-lmb-batch-low-voltage-vehicle:
+  - 'gf-lmb-batch-low-voltage-vehicle/**/*.{css,html,js,json,properties,py,vue,yaml,md}'
