@@ -5,7 +5,7 @@ on:
     branches:
       - develop
       - release
-      - master
+      - main
     types:
       - closed
     paths:
@@ -33,7 +33,7 @@ jobs:
   detect-changes:
     runs-on: ubuntu-latest
     timeout-minutes: 15
-    if: ${{ (github.base_ref == 'develop' || github.base_ref == 'release' || github.base_ref == 'master') && (github.event.pull_request.merged == true) }}
+    if: ${{ (github.base_ref == 'develop' || github.base_ref == 'release' || github.base_ref == 'main') && (github.event.pull_request.merged == true) }}
     outputs:
       changed: ${{ steps.filter.outputs.changes }}
     steps:
@@ -51,7 +51,7 @@ jobs:
             echo "OIDC_ROLE=${{ vars.OIDC_ROLE_DEV }}" >> $GITHUB_ENV
           elif [ "$BRANCH_BASE" = "release" ]; then
             echo "OIDC_ROLE=${{ vars.OIDC_ROLE_STG }}" >> $GITHUB_ENV
-          elif [ "$BRANCH_BASE" = "master" ]; then
+          elif [ "$BRANCH_BASE" = "main" ]; then
             echo "OIDC_ROLE=${{ vars.OIDC_ROLE_PRD }}" >> $GITHUB_ENV
           else
             echo "OIDC_ROLE=" >> $GITHUB_ENV
