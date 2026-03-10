@@ -5,16 +5,18 @@ on:
     branches:
       - develop
       - release
-      - main
+      - master
     types:
       - closed
     paths:
       # Lambda関数のディレクトリパターン
-      - '*gf-lmb-*/**'
+      - 'gf-lmb-*/**'
       - 'gdcm-lmb-*/**'
       - 'tfleet-id__batch-non-update-vehicle/**'
       - 'tfleet-id__tcjp-device-deactivate/**'
       - 'tfleet-id__tcjp--pipe-to-cold-datastore/**'
+      - 'tfleet-id__grab-data-ingest-lambda/**'
+      - 'tfleet-id__ingestion-master/**'
 
 env:
   AWS_REGION: ${{ vars.APP_REGION }}
@@ -33,7 +35,7 @@ jobs:
   detect-changes:
     runs-on: ubuntu-latest
     timeout-minutes: 15
-    if: ${{ (github.base_ref == 'develop' || github.base_ref == 'release' || github.base_ref == 'main') && (github.event.pull_request.merged == true) }}
+    if: ${{ (github.base_ref == 'develop' || github.base_ref == 'release' || github.base_ref == 'master') && (github.event.pull_request.merged == true) }}
     outputs:
       changed: ${{ steps.filter.outputs.changes }}
     steps:
@@ -51,12 +53,11 @@ jobs:
             echo "OIDC_ROLE=${{ vars.OIDC_ROLE_DEV }}" >> $GITHUB_ENV
           elif [ "$BRANCH_BASE" = "release" ]; then
             echo "OIDC_ROLE=${{ vars.OIDC_ROLE_STG }}" >> $GITHUB_ENV
-          elif [ "$BRANCH_BASE" = "main" ]; then
+          elif [ "$BRANCH_BASE" = "master" ]; then
             echo "OIDC_ROLE=${{ vars.OIDC_ROLE_PRD }}" >> $GITHUB_ENV
           else
             echo "OIDC_ROLE=" >> $GITHUB_ENV
           fi
-
   deploy:
     needs: detect-changes
     if: ${{ needs.detect-changes.outputs.changed != '' }}
@@ -84,7 +85,6 @@ jobs:
         run: |
           HASH=$(aws lambda get-function --function-name "$LAMBDA_NAME" --query 'Configuration.CodeSha256' --output text)
           echo "HASH=$HASH" >> $GITHUB_ENV
-
       # Lambdaのデプロイ処理
       - name: Deploy Lambda (${{ matrix.lambda }})
         run: |
@@ -92,7 +92,7 @@ jobs:
           if [ "$LAMBDA_NAME" = "tfleet-id__grab-data-ingest-lambda" ] || [ "$LAMBDA_NAME" = "tfleet-id__tcjp--pipe-to-cold-datastore" ]; then
             aws lambda update-function-code --function-name "${LAMBDA_NAME}-s3" --zip-file fileb://function.zip
           fi
-
+      
       # デプロイ後のLambdaのハッシュ値取得と比較
       - name: Verify Lambda deployment
         run: |
