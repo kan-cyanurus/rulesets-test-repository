@@ -1,276 +1,122 @@
-return  [
-    // Lambda関数
-    deployFuncMap: [
-        [
-            step: 'tfleet-id__ingestion-master',
-            lambdaName: 'tfleet-id__tcjp-ingestion-master',
-            layerName: 'translog_ingest_base_library',
-            diffFlg: false,
-        ],
-        [
-            step: 'tfleet-id__grab-data-ingest-lambda',
-            lambdaName: 'tfleet-id__tcjp-gfms-ingestion-lambda',
-            layerName: 'translog_ingest_base_library',
-            diffFlg: false,
-        ],
-        [
-            step: 'tfleet-id__tcjp--pipe-to-cold-datastore',
-            lambdaName: 'tfleet-id__tcjp--pipe-to-cold-datastore',
-            layerName: 'translog_ingest_base_library',
-            diffFlg: false,
-        ],
-        [
-            step: 'tfleet-id__batch-non-update-vehicle',
-            lambdaName: 'tfleet-id__batch-non-update-vehicle',
-            layerName: 'node14pgaxios',
-            diffFlg: false,
-        ],
-        [
-            step: 'gf-lmb-batch-low-voltage-vehicle',
-            lambdaName: 'gf-lmb-batch-low-voltage-vehicle',
-            layerName: 'node14pgaxios',
-            diffFlg: false,
-        ],
-        [
-            step: 'tfleet-id__send_email',
-            lambdaName: 'send_emails',
-            layerName: 'gf-lml-aws-sdk-v2',
-            diffFlg: false,
-        ],
-        [
-            step: 'gfleet-api',
-            lambdaName: 'gf-lmb-func-authorizer',
-            layerName: 'translog_ingest_base_library',
-            diffFlg: false,
-        ],
-        [
-            step: 'gfleet_batch-data-viewer',
-            lambdaName: 'gf-lmb-func-dataviewer',
-            layerName: 'translog_ingest_base_library',
-            diffFlg: false,
-        ],
-        [
-            step: 'gfleet_batch-data-viewer',
-            lambdaName: 'gf-lmb-func-dataviewer-local',
-            layerName: 'translog_ingest_base_library',
-            diffFlg: false,
-        ],
-        [
-            step: 'tfleet-id__tcjp-device-deactivate',
-            lambdaName: 'tfleet-id__tcjp-device-deactivate',
-            layerName: 'translog_ingest_base_library',
-            diffFlg: false,
-        ],
-        [
-            step: 'gf-driving-score',
-            lambdaName: 'driving-score-lambda',
-            layerName: 'gf-lml-aws-sdk-v2',
-            diffFlg: false,
-        ],
-        [
-            step: 'gf-lmb-batch-billing-dataprocess',
-            lambdaName: 'gf-lmb-batch-billing-dataprocess',
-            layerName: 'gf-lml-batch-billing-dataprocess',
-            diffFlg: false
-        ],
-        [
-            step: 'gf-lmb-batch-dashboard-daily-data',
-            lambdaName: 'gf-lmb-batch-dashboard-daily-data',
-            layerName: 'gf-lml-batch-dashboard-daily-data',
-            diffFlg: false
-        ],
-        [
-            step: 'gf-lmb-batch-data-maintenance',
-            lambdaName: 'gf-lmb-batch-data-maintenance',
-            layerName: 'gf-lml-batch-data-maintenance',
-            diffFlg: false
-        ],
-        [
-            step: 'gf-lmb-batch-maintenance-reminder-send-datethresholdexceed',
-            lambdaName: 'gf-lmb-batch-maintenance-reminder-send-datethresholdexceed',
-            layerName: 'gf-lml-maintenance-reminder',
-            diffFlg: false
-        ],
-        [
-            step: 'gf-lmb-batch-maintenance-reminder-update-datethresholdexceed',
-            lambdaName: 'gf-lmb-batch-maintenance-reminder-update-datethresholdexceed',
-            layerName: 'gf-lml-maintenance-reminder',
-            diffFlg: false
-        ],
-        [
-            step: 'gf-lmb-batch-update-materialized-task-table',
-            lambdaName: 'gf-lmb-batch-update-materialized-task-table',
-            layerName: 'gf-lml-node-db-data-maintenance',
-            diffFlg: false
-        ],
-        [
-            step: 'gf-lmb-geotab-obd-datareceive-recv',
-            lambdaName: 'gf-lmb-geotab-obd-datareceive-recv',
-            layerName: 'gf-lml-geotab-obd-datareceive',
-            diffFlg: false
-        ],
-        [
-            step: 'gf-lmb-ldcm-btob-datareceive-ingest',
-            lambdaName: 'gf-lmb-ldcm-btob-datareceive-ingest',
-            layerName: 'gf-lml-ldcm-btob-datareceive',
-            diffFlg: false
-        ],
-        [
-            step: 'gf-lmb-ldcm-btob-datareceive-ingest',
-            lambdaName: 'gf-lmb-ldcm-btob-datareceive-ingest-local',
-            layerName: 'gf-lml-ldcm-btob-datareceive',
-            diffFlg: false
-        ],
-        [
-            step: 'gf-lmb-ldcm-btob-datareceive-recv',
-            lambdaName: 'gf-lmb-ldcm-btob-datareceive-recv',
-            layerName: 'gf-lml-ldcm-btob-datareceive-recv',
-            diffFlg: false
-        ],
-        [
-            step: 'gf-lmb-ldcm-btob-datareceive-recv',
-            lambdaName: 'gf-lmb-ldcm-btob-datareceive-recv-local',
-            layerName: 'gf-lml-ldcm-btob-datareceive-recv',
-            diffFlg: false
-        ],
-        [
-            step: 'gf-lmb-ldcm-btob-datareceive-send',
-            lambdaName: 'gf-lmb-ldcm-btob-datareceive-send',
-            layerName: 'gf-lml-ldcm-btob-datareceive',
-            diffFlg: false
-        ],
-        [
-            step: 'gf-lmb-ldcm-btob-datareceive-unsent-extract',
-            lambdaName: 'gf-lmb-ldcm-btob-datareceive-unsent-extract',
-            layerName: 'gf-lml-ldcm-btob-datareceive',
-            diffFlg: false
-        ],
-        [
-            step: 'gf-lmb-ldcm-btob-teltonika-datareceive-ingest',
-            lambdaName: 'gf-lmb-ldcm-btob-teltonika-datareceive-ingest',
-            layerName: 'gf-lml-ldcm-btob-datareceive',
-            diffFlg: false
-        ],
-        [
-            step: 'gf-lmb-ldcm-btob-teltonika-datareceive-ingest',
-            lambdaName: 'gf-lmb-ldcm-btob-teltonika-datareceive-ingest-local',
-            layerName: 'gf-lml-ldcm-btob-datareceive',
-            diffFlg: false
-        ],
-        [
-            step: 'gf-lmb-ldcm-btob-teltonika-datareceive-recv',
-            lambdaName: 'gf-lmb-ldcm-btob-teltonika-datareceive-recv',
-            layerName: 'gf-lml-ldcm-btob-teltonika-datareceive-recv',
-            diffFlg: false
-        ],
-        [
-            step: 'gf-lmb-ldcm-btob-teltonika-datareceive-recv',
-            lambdaName: 'gf-lmb-ldcm-btob-teltonika-datareceive-recv-local',
-            layerName: 'ggf-lml-ldcm-btob-teltonika-datareceive-recv',
-            diffFlg: false
-        ],
-        [
-            step: 'gf-lmb-ldcm-cache-cleaner',
-            lambdaName: 'gf-lmb-ldcm-cache-cleaner',
-            layerName: 'gf-lml-ldcm-cache-cleaner',
-            diffFlg: false
-        ],
-        [
-            step: 'gf-lmb-ldcm-datatransfer',
-            lambdaName: 'gf-lmb-ldcm-datatransfer',
-            layerName: 'gf-lml-ldcm-datatransfer',
-            diffFlg: false
-        ],
-        [
-            step: 'gf-lmb-ldcm-datatransfer',
-            lambdaName: 'gf-lmb-ldcm-datatransfer-local',
-            layerName: 'gf-lml-ldcm-datatransfer',
-            diffFlg: false
-        ],
-        [
-            step: 'gf-lmb-mdi-odo-recv',
-            lambdaName: 'gf-lmb-mdi-odo-recv',
-            layerName: 'gf-lml-mdi-odo',
-            diffFlg: false
-        ],
-        [
-            step: 'gf-lmb-mdi-odo-send',
-            lambdaName: 'gf-lmb-mdi-odo-send',
-            layerName: 'gf-lml-mdi-odo',
-            diffFlg: false
-        ],
-        [
-            step: 'gf-lmb-scsk-driving-score',
-            lambdaName: 'gf-lmb-scsk-driving-score',
-            layerName: 'gf-lml-scsk-driving-score',
-            diffFlg: false
-        ],
-        [
-            step: 'gf-lmb-geotab-user-dispatcher',
-            lambdaName: 'gf-lmb-geotab-user-dispatcher',
-            layerName: 'gf-lml-geotab-user-dispatcher',
-            diffFlg: false
-        ],
-        [
-            step: 'gf-lmb-geotab-linkage',
-            lambdaName: 'gf-lmb-geotab-linkage',
-            layerName: 'gf-lml-geotab-mygeotab, gf-lml-geotab-base',
-            diffFlg: false
-        ],
-        [
-            step: 'gf-lmb-geotab-cache-cleaner',
-            lambdaName: 'gf-lmb-geotab-cache-cleaner',
-            layerName: 'gf-lml-geotab-cache-cleaner',
-            diffFlg: false
-        ],
-        [
-            step: 'gf-lmb-crash-detection-classifier',
-            lambdaName: 'gf-lmb-crash-detection-classifier',
-            layerName : 'gf-lml-crash-detection-classifier',
-            diffFlg: false
-        ],
-        [
-            step:'gf-lmb-batch-report-scheduler',
-            lambdaName : 'gf-lmb-batch-report-scheduler',
-            layerName : 'gf-lml-batch-report-scheduler',
-            diffFlg : false,
-        ],
-        [
-            step:'gf-lmb-async-report',
-            lambdaName : 'gf-lmb-async-report',
-            layerName : 'gf-lml-async-report',
-            diffFlg : false,
-        ],
-        [
-            step:'gf-lmb-crash-detection-alert',
-            lambdaName : 'gf-lmb-crash-detection-alert',
-            layerName : 'gf-lml-crash-detection-alert',
-            diffFlg : false,
-        ],
-        [
-            step:'gf-lmb-tmt-ldcm-cache-cleaner',
-            lambdaName : 'gf-lmb-tmt-ldcm-cache-cleaner',
-            layerName : 'gf-lml-tmt-ldcm-cache-cleaner',
-            diffFlg : false,
-        ],
-        [
-            step:'gf-lmb-tmt-ldcm-dispatcher',
-            lambdaName : 'gf-lmb-tmt-ldcm-dispatcher',
-            layerName : 'gf-lml-tmt-ldcm-dispatcher',
-            diffFlg : false,
-        ],
-        [
-            step:'gf-lmb-tmt-ldcm-send',
-            lambdaName : 'gf-lmb-tmt-ldcm-send',
-            layerName : 'gf-lml-tmt-ldcm-base',
-            diffFlg : false,
-        ],
-        //TODO レイヤーが自動デプロイ対象になったら以下を追加
-        // [
-        //     step:'gf-lmb-tmt-ldcm-send',
-        //     lambdaName : 'gf-lmb-tmt-ldcm-send',
-        //     layerName : 'gf-lml-tmt-ldcm-send',
-        //     diffFlg : false,
-        // ],
-    ], 
-]
+
+tfleet-id__tcjp-ingestion-master:
+  - 'tfleet-id__ingestion-master/**/*.{css,html,js,json,properties,py,vue,yaml,md}'
+
+tfleet-id__tcjp-gfms-ingestion-lambda:
+  - 'tfleet-id__grab-data-ingest-lambda/**/*.{css,html,js,json,properties,py,vue,yaml,md}'
+
+tfleet-id__tcjp--pipe-to-cold-datastore:
+  - 'tfleet-id__tcjp--pipe-to-cold-datastore/**/*.{css,html,js,json,properties,py,vue,yaml,md}'
+
+tfleet-id__batch-non-update-vehicle:
+  - 'tfleet-id__batch-non-update-vehicle/**/*.{css,html,js,json,properties,py,vue,yaml,md}'
+
+gf-lmb-batch-low-voltage-vehicle:
+  - 'gf-lmb-batch-low-voltage-vehicle/**/*.{css,html,js,json,properties,py,vue,yaml,md}'
+
+send_emails:
+  # - 'tfleet-id__send_email/**/*.{css,html,js,json,properties,py,vue,yaml,md}'
+
+gf-lmb-func-authorizer:
+  # - 'gfleet-api/**/*.{css,html,js,json,properties,py,vue,yaml,md}'
+
+gf-lmb-func-dataviewer:
+  # - 'gfleet_batch-data-viewer/**/*.{css,html,js,json,properties,py,vue,yaml,md}'
+
+gf-lmb-func-dataviewer-local:
+  # - 'gfleet_batch-data-viewer/**/*.{css,html,js,json,properties,py,vue,yaml,md}'
+
+tfleet-id__tcjp-device-deactivate:
+  # - 'tfleet-id__tcjp-device-deactivate/**/*.{css,html,js,json,properties,py,vue,yaml,md}'
+
+driving-score-lambda:
+  # - 'gf-driving-score/**/*.{css,html,js,json,properties,py,vue,yaml,md}'
+
+gf-lmb-batch-billing-dataprocess:
+  # - 'gf-lmb-batch-billing-dataprocess/**/*.{css,html,js,json,properties,py,vue,yaml,md}'
+
+gf-lmb-batch-dashboard-daily-data:
+  # - 'gf-lmb-batch-dashboard-daily-data/**/*.{css,html,js,json,properties,py,vue,yaml,md}'
+
+gf-lmb-batch-data-maintenance:
+  # - 'gf-lmb-batch-data-maintenance/**/*.{css,html,js,json,properties,py,vue,yaml,md}'
+
+gf-lmb-batch-maintenance-reminder-send-datethresholdexceed:
+  # - 'gf-lmb-batch-maintenance-reminder-send-datethresholdexceed/**/*.{css,html,js,json,properties,py,vue,yaml,md}'
+
+gf-lmb-batch-maintenance-reminder-update-datethresholdexceed:
+  # - 'gf-lmb-batch-maintenance-reminder-update-datethresholdexceed/**/*.{css,html,js,json,properties,py,vue,yaml,md}'
+
+gf-lmb-batch-update-materialized-task-table:
+  # - 'gf-lmb-batch-update-materialized-task-table/**/*.{css,html,js,json,properties,py,vue,yaml,md}'
+
+gf-lmb-geotab-obd-datareceive-recv:
+  # - 'gf-lmb-geotab-obd-datareceive-recv/**/*.{css,html,js,json,properties,py,vue,yaml,md}'
+
+gf-lmb-ldcm-btob-datareceive-ingest:
+  # - 'gf-lmb-ldcm-btob-datareceive-ingest/**/*.{css,html,js,json,properties,py,vue,yaml,md}'
+
+gf-lmb-ldcm-btob-datareceive-ingest-local:
+  # - 'gf-lmb-ldcm-btob-datareceive-ingest/**/*.{css,html,js,json,properties,py,vue,yaml,md}'
+
+gf-lmb-ldcm-btob-datareceive-recv:
+  # - 'gf-lmb-ldcm-btob-datareceive-recv/**/*.{css,html,js,json,properties,py,vue,yaml,md}'
+
+gf-lmb-ldcm-btob-datareceive-recv-local:
+  # - 'gf-lmb-ldcm-btob-datareceive-recv/**/*.{css,html,js,json,properties,py,vue,yaml,md}'
+
+gf-lmb-ldcm-btob-datareceive-send:
+  # - 'gf-lmb-ldcm-btob-datareceive-send/**/*.{css,html,js,json,properties,py,vue,yaml,md}'
+
+gf-lmb-ldcm-btob-datareceive-unsent-extract:
+  # - 'gf-lmb-ldcm-btob-datareceive-unsent-extract/**/*.{css,html,js,json,properties,py,vue,yaml,md}'
+
+gf-lmb-ldcm-btob-teltonika-datareceive-ingest:
+  # - 'gf-lmb-ldcm-btob-teltonika-datareceive-ingest/**/*.{css,html,js,json,properties,py,vue,yaml,md}'
+
+gf-lmb-ldcm-btob-teltonika-datareceive-ingest-local:
+  # - 'gf-lmb-ldcm-btob-teltonika-datareceive-ingest/**/*.{css,html,js,json,properties,py,vue,yaml,md}'
+
+gf-lmb-ldcm-btob-teltonika-datareceive-recv:
+  # - 'gf-lmb-ldcm-btob-teltonika-datareceive-recv/**/*.{css,html,js,json,properties,py,vue,yaml,md}'
+
+gf-lmb-ldcm-btob-teltonika-datareceive-recv-local:
+  # - 'gf-lmb-ldcm-btob-teltonika-datareceive-recv/**/*.{css,html,js,json,properties,py,vue,yaml,md}'
+
+gf-lmb-ldcm-cache-cleaner:
+  # - 'gf-lmb-ldcm-cache-cleaner/**/*.{css,html,js,json,properties,py,vue,yaml,md}'
+
+gf-lmb-ldcm-datatransfer:
+  # - 'gf-lmb-ldcm-datatransfer/**/*.{css,html,js,json,properties,py,vue,yaml,md}'
+
+gf-lmb-ldcm-datatransfer-local:
+  # - 'gf-lmb-ldcm-datatransfer/**/*.{css,html,js,json,properties,py,vue,yaml,md}'
+
+gf-lmb-mdi-odo-recv:
+  # - 'gf-lmb-mdi-odo-recv/**/*.{css,html,js,json,properties,py,vue,yaml,md}'
+
+gf-lmb-mdi-odo-send:
+  # - 'gf-lmb-mdi-odo-send/**/*.{css,html,js,json,properties,py,vue,yaml,md}'
+	
+gf-lmb-scsk-driving-score:
+  # - 'gf-lmb-scsk-driving-score/**/*.{css,html,js,json,properties,py,vue,yaml,md}'
+	
+gf-lmb-geotab-user-dispatcher:
+  # - 'gf-lmb-geotab-user-dispatcher/**/*.{css,html,js,json,properties,py,vue,yaml,md}'
+	
+gf-lmb-geotab-linkage:
+  # - 'gf-lmb-geotab-linkage/**/*.{css,html,js,json,properties,py,vue,yaml,md}'
+	
+gf-lmb-geotab-cache-cleaner:
+  # - 'gf-lmb-geotab-cache-cleaner/**/*.{css,html,js,json,properties,py,vue,yaml,md}'
+	
+gf-lmb-crash-detection-classifier:
+  # - 'gf-lmb-crash-detection-classifier/**/*.{css,html,js,json,properties,py,vue,yaml,md}'
+	
+gf-lmb-batch-report-scheduler:
+  # - 'gf-lmb-batch-report-scheduler/**/*.{css,html,js,json,properties,py,vue,yaml,md}'
+	
+gf-lmb-async-report:
+  # - 'gf-lmb-async-report/**/*.{css,html,js,json,properties,py,vue,yaml,md}'
+gf-lmb-crash-detection-alert:
+  # - 'gf-lmb-crash-detection-alert/**/*.{css,html,js,json,properties,py,vue,yaml,md}'
