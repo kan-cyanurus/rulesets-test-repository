@@ -1,22 +1,15 @@
 name: Deploy Changed Lambdas
 
 on:
-  pull_request:
+  push:
     branches:
       - develop
       - release
-      - master
-    types:
-      - closed
+      - main
     paths:
       # Lambda関数のディレクトリパターン
-      - 'gf-lmb-*/**'
-      - 'gdcm-lmb-*/**'
-      - 'tfleet-id__batch-non-update-vehicle/**'
-      - 'tfleet-id__tcjp-device-deactivate/**'
-      - 'tfleet-id__tcjp--pipe-to-cold-datastore/**'
-      - 'tfleet-id__grab-data-ingest-lambda/**'
-      - 'tfleet-id__ingestion-master/**'
+      - 'test1-*/**'
+      - 'test2-*/**'
 
 env:
   BRANCH_BASE: ${{ github.base_ref }}
@@ -34,7 +27,7 @@ jobs:
   detect-changes:
     runs-on: ubuntu-latest
     timeout-minutes: 15
-    if: ${{ (github.base_ref == 'develop' || github.base_ref == 'release' || github.base_ref == 'master') && (github.event.pull_request.merged == true) }}
+    if: ${{ github.base_ref == 'develop' || github.base_ref == 'release' || github.base_ref == 'main' }}
     outputs:
       changed: ${{ steps.filter.outputs.changes }}
     steps:
