@@ -30,6 +30,7 @@ jobs:
     if: ${{ github.ref_name == 'develop' || github.ref_name == 'release' || github.ref_name == 'main' }}
     outputs:
       changed: ${{ steps.filter.outputs.changes }}
+      oidc_role: ${{ steps.set_oidc_role.outputs.oidc_role }}
     steps:
       - uses: actions/checkout@v4
       - id: filter
@@ -40,15 +41,16 @@ jobs:
 
       # OIDC_ROLEの設定
       - name: Set OIDC_ROLE
+        id: set_oidc_role
         run: |
           if [ "$REF_NAME" = "develop" ]; then
-            echo "OIDC_ROLE= 開発" >> $GITHUB_ENV
+            echo "oidc_role=${{ vars.OIDC_ROLE_DEV }}" >> $GITHUB_OUTPUT
           elif [ "$REF_NAME" = "release" ]; then
-            echo "OIDC_ROLE= 検証" >> $GITHUB_ENV
-          elif [ "$REF_NAME" = "main" ]; then
-            echo "OIDC_ROLE= 本番" >> $GITHUB_ENV
+            echo "oidc_role=${{ vars.OIDC_ROLE_STG }}" >> $GITHUB_OUTPUT
+          elif [ "$REF_NAME" = "master" ]; then
+            echo "oidc_role=${{ vars.OIDC_ROLE_PRD }}" >> $GITHUB_OUTPUT
           else
-            echo "OIDC_ROLE=" >> $GITHUB_ENV
+            echo "oidc_role=" >> $GITHUB_OUTPUT
           fi
 
   deploy:
@@ -61,6 +63,7 @@ jobs:
         lambda: ${{ fromJson(needs.detect-changes.outputs.changed) }}
     env:
       LAMBDA_NAME: ${{ matrix.lambda }}
+      OIDC_ROLE: ${{ needs.detect-changes.outputs.oidc_role }}
     steps:
       - uses: actions/checkout@v4
 
@@ -75,3 +78,4 @@ jobs:
       - name: Deploy Lambda (${{ matrix.lambda }})
         run: |
           echo "LAMDA DEPLOY"
+          echo "${{ env.OIDC_ROLE }}"
