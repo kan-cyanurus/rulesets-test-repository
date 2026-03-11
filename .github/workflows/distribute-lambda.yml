@@ -64,6 +64,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # LAMBDAのZIP化
+      - name: Zip Lambda source
+        run: |
+          cd $LAMBDA_NAME
+          zip -r "../${LAMBDA_NAME}.zip" .
+          cd ..
+    
       # Lambdaのデプロイ処理
       - name: Deploy Lambda (${{ matrix.lambda }})
         run: |
