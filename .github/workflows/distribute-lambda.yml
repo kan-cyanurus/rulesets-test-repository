@@ -47,7 +47,7 @@ jobs:
             echo "oidc_role=${{ vars.OIDC_ROLE_DEV }}" >> $GITHUB_OUTPUT
           elif [ "$REF_NAME" = "release" ]; then
             echo "oidc_role=${{ vars.OIDC_ROLE_STG }}" >> $GITHUB_OUTPUT
-          elif [ "$REF_NAME" = "master" ]; then
+          elif [ "$REF_NAME" = "main" ]; then
             echo "oidc_role=${{ vars.OIDC_ROLE_PRD }}" >> $GITHUB_OUTPUT
           else
             echo "oidc_role=" >> $GITHUB_OUTPUT
