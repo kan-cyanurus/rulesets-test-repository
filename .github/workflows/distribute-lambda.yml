@@ -12,7 +12,7 @@ on:
       - 'test2-*/**'
 
 env:
-  BRANCH_BASE: ${{ github.base_ref }}
+  BRANCH_BASE: ${{ github.ref_name }}
 
 permissions:
   id-token: write # OIDC（OpenID Connect）による認証情報の発行を許可
@@ -27,7 +27,7 @@ jobs:
   detect-changes:
     runs-on: ubuntu-latest
     timeout-minutes: 15
-    if: ${{ github.base_ref == 'develop' || github.base_ref == 'release' || github.base_ref == 'main' }}
+    if: ${{ github.ref_name == 'develop' || github.ref_name == 'release' || github.ref_name == 'main' }}
     outputs:
       changed: ${{ steps.filter.outputs.changes }}
     steps:
@@ -37,6 +37,19 @@ jobs:
         uses: dorny/paths-filter@v3
         with:
           filters: .github/lambda-deploy-def-map.yml
+
+      # OIDC_ROLEの設定
+      - name: Set OIDC_ROLE
+        run: |
+          if [ "$BRANCH_BASE" = "develop" ]; then
+            echo "OIDC_ROLE= 開発" >> $GITHUB_ENV
+          elif [ "$BRANCH_BASE" = "release" ]; then
+            echo "OIDC_ROLE= 検証" >> $GITHUB_ENV
+          elif [ "$BRANCH_BASE" = "master" ]; then
+            echo "OIDC_ROLE= 本番" >> $GITHUB_ENV
+          else
+            echo "OIDC_ROLE=" >> $GITHUB_ENV
+          fi
 
   deploy:
     needs: detect-changes
