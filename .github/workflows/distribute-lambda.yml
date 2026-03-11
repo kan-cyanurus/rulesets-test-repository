@@ -12,7 +12,7 @@ on:
       - 'test2-*/**'
 
 env:
-  BRANCH_BASE: ${{ github.ref_name }}
+  BRANCH_BASE: ${{ github.base_ref }}
 
 permissions:
   id-token: write # OIDC（OpenID Connect）による認証情報の発行を許可
