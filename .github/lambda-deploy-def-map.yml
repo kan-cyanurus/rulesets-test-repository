@@ -1,6 +1,6 @@
 
-test0-hogehoge:　[]
-# - 'test0-hogehoge/**/*.{css,html,js,json,properties,py,vue,yaml,md}'
+# test0-hogehoge:
+  # - 'test0-hogehoge/**/*.{css,html,js,json,properties,py,vue,yaml,md}'
 
 test1-hogehoge:
   - 'test1-hogehoge/**/*.{css,html,js,json,properties,py,vue,yaml,md}'
