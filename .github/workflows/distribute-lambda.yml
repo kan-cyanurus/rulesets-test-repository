@@ -45,7 +45,7 @@ jobs:
             echo "OIDC_ROLE= 開発" >> $GITHUB_ENV
           elif [ "$BRANCH_BASE" = "release" ]; then
             echo "OIDC_ROLE= 検証" >> $GITHUB_ENV
-          elif [ "$BRANCH_BASE" = "master" ]; then
+          elif [ "$BRANCH_BASE" = "main" ]; then
             echo "OIDC_ROLE= 本番" >> $GITHUB_ENV
           else
             echo "OIDC_ROLE=" >> $GITHUB_ENV
