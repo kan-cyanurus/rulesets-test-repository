@@ -12,7 +12,7 @@ on:
       - 'test2-*/**'
 
 env:
-  BRANCH_BASE: ${{ github.base_ref }}
+  REF_NAME: ${{ github.ref_name }}
 
 permissions:
   id-token: write # OIDC（OpenID Connect）による認証情報の発行を許可
@@ -20,7 +20,7 @@ permissions:
 
 # 同じブランチ内で同時実行制御の設定
 concurrency:
-  group: lambda-deploy-${{ github.base_ref }}
+  group: lambda-deploy-${{ github.ref_name }}
   cancel-in-progress: false
 
 jobs:
@@ -41,11 +41,11 @@ jobs:
       # OIDC_ROLEの設定
       - name: Set OIDC_ROLE
         run: |
-          if [ "$BRANCH_BASE" = "develop" ]; then
+          if [ "$REF_NAME" = "develop" ]; then
             echo "OIDC_ROLE= 開発" >> $GITHUB_ENV
-          elif [ "$BRANCH_BASE" = "release" ]; then
+          elif [ "$REF_NAME" = "release" ]; then
             echo "OIDC_ROLE= 検証" >> $GITHUB_ENV
-          elif [ "$BRANCH_BASE" = "main" ]; then
+          elif [ "$REF_NAME" = "main" ]; then
             echo "OIDC_ROLE= 本番" >> $GITHUB_ENV
           else
             echo "OIDC_ROLE=" >> $GITHUB_ENV
