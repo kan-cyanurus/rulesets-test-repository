@@ -1,9 +1,13 @@
 
-# test0-hogehoge:
-  # - 'test0-hogehoge/**/*.{css,html,js,json,properties,py,vue,yaml,md}'
+# test0-hoge:
+#   dir: 'test0-hogehoge'
+#   filter: 'test0-hogehoge/**/*.{css,html,js,json,properties,py,vue,yaml,md}'
 
-test1-hogehoge:
-  - 'test1-hogehoge/**/*.{css,html,js,json,properties,py,vue,yaml,md}'
+test1-hoge:
+  dir: 'test1-hogehoge'
+  filter: 'test1-hogehoge/**/*.{css,html,js,json,properties,py,vue,yaml,md}'
 
-test2-hogehoge:
-  - 'test2-hogehoge/**/*.{css,html,js,json,properties,py,vue,yaml,md}'
+test2-hoge:
+  dir: 'test2-hogehoge'
+  filter: 'test2-hogehoge/**/*.{css,html,js,json,properties,py,vue,yaml,md}'
+
