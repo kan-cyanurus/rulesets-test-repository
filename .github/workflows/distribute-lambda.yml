@@ -29,15 +29,41 @@ jobs:
     timeout-minutes: 15
     if: ${{ github.ref_name == 'develop' || github.ref_name == 'release' || github.ref_name == 'main' }}
     outputs:
-      changed: ${{ steps.filter.outputs.changes }}
+      changed: ${{ steps.set-matrix.outputs.changed }}
       oidc_role: ${{ steps.set_oidc_role.outputs.oidc_role }}
     steps:
       - uses: actions/checkout@v4
+
+      # 1. 外部YAMLから「キー: フィルタ」の形式だけを抽出して一時ファイルを作る
+      - name: Generate filter file
+        run: |
+          # yq を使って filter 部分だけを抽出
+          yq 'map_values(.filter)' .github/lambda-deploy-def-map.yml > .github/lambda-filters.yml
+
+      # 2. 差分検知を実行   
       - id: filter
         # 差分のあるlambdaファイルを検出
         uses: dorny/paths-filter@v3
         with:
-          filters: .github/lambda-deploy-def-map.yml
+          filters: .github/lambda-filter.yml
+
+      # 3. 差分があったキーに対して、元のYAMLから「キー, dir, filter」を取り出してJSON化
+      - id: set-matrix
+        run: |
+          CHANGES='${{ steps.filter.outputs.changes }}'
+          
+          # 元のYAMLと変更リスト(CHANGES)を照合して、マトリックス用JSONを生成
+          # キー、ディレクトリ、フィルタの3点を含むオブジェクトの配列を作る
+          MATRIX=$(yq e -j '.github/lambda-deploy-def-map.yml' | jq -c --argjson changes "$CHANGES" '
+            to_entries 
+            | map(select(.key as $k | $changes | index($k))) 
+            | map({
+                key: .key,
+                dir: .value.dir,
+                filter: .value.filter
+              })
+          ')
+          echo "matrix=$MATRIX" >> $GITHUB_OUTPUT
 
       # OIDC_ROLEの設定
       - name: Set OIDC_ROLE
@@ -55,14 +81,15 @@ jobs:
 
   deploy:
     needs: detect-changes
-    if: ${{ needs.detect-changes.outputs.changed != '' }}
+    if:  ${{ needs.detect-changes.outputs.changed != '[]' && needs.detect-changes.outputs.changed != '' }}
     runs-on: ubuntu-latest
     timeout-minutes: 45
     strategy:
       matrix:
         lambda: ${{ fromJson(needs.detect-changes.outputs.changed) }}
     env:
-      LAMBDA_NAME: ${{ matrix.lambda }}
+      LAMBDA_NAME: ${{ matrix.lambda.key }}
+      LAMBDA_DIR: ${{ matrix.lambda.dir }}
       OIDC_ROLE: ${{ needs.detect-changes.outputs.oidc_role }}
     steps:
       - uses: actions/checkout@v4
@@ -78,4 +105,6 @@ jobs:
       - name: Deploy Lambda (${{ matrix.lambda }})
         run: |
           echo "LAMDA DEPLOY"
+          echo "${{ env.LAMBDA_NAME }}"
+          echo "${{ env.LAMBDA_DIR }}"
           echo "${{ env.OIDC_ROLE }}"
