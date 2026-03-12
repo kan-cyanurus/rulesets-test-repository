@@ -63,7 +63,7 @@ jobs:
                 filter: .value.filter
               })
           ')
-          echo "matrix=$MATRIX" >> $GITHUB_OUTPUT
+          echo "changed=$MATRIX" >> $GITHUB_OUTPUT
 
       # OIDC_ROLEの設定
       - name: Set OIDC_ROLE
