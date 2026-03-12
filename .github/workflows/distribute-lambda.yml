@@ -45,7 +45,7 @@ jobs:
         # 差分のあるlambdaファイルを検出
         uses: dorny/paths-filter@v3
         with:
-          filters: .github/lambda-filter.yml
+          filters: .github/lambda-filters.yml
 
       # 3. 差分があったキーに対して、元のYAMLから「キー, dir, filter」を取り出してJSON化
       - id: set-matrix
