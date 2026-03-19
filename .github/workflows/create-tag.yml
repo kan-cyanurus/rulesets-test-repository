@@ -1,13 +1,15 @@
 name: Create Tag on Release Branch
 
 on:
-  push:
+  pull_request:
     branches:
       - main
+    types:
+      - closed
 
 jobs:
   create-tag:
-    if: startsWith(github.ref_name, 'releases/')
+    if: github.event.pull_request.merged == true && startsWith(github.head_ref, 'releases/')
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -16,7 +18,7 @@ jobs:
 
       - name: Set Tag Name
         run: |
-          TAG_NAME="${GITHUB_REF_NAME#releases/}"
+          TAG_NAME="${GITHUB_HEAD_REF#releases/}"
           echo "TAG_NAME=$TAG_NAME" >> $GITHUB_ENV
 
       - name: Create Tag
