@@ -1,0 +1,31 @@
+name: Create Tag on Release Branch
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  create-tag:
+    if: startsWith(github.ref_name, 'main/')
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set Tag Name
+        run: |
+          TAG_NAME="${GITHUB_REF_NAME#mains/}"
+          echo "TAG_NAME=$TAG_NAME" >> $GITHUB_ENV
+
+      - name: Create Tag
+        run: |
+          git config --global user.name "github-actions"
+          git config --global user.email "github-actions@github.com"
+          if git tag -l | grep -q "$TAG_NAME"; then
+            echo "$TAG_NAME は既に存在しています。タグの作成をスキップします。"
+          else
+            git tag $TAG_NAME
+            git push origin $TAG_NAME
+          fi
