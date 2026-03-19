@@ -7,6 +7,9 @@ on:
     types:
       - closed
 
+permissions:
+  contents: write # タグの作成とプッシュのために書き込み権限を付与
+
 jobs:
   create-tag:
     if: github.event.pull_request.merged == true && startsWith(github.head_ref, 'releases/')
