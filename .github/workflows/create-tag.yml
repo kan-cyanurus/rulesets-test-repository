@@ -28,6 +28,7 @@ jobs:
         run: |
           git config --global user.name "github-actions"
           git config --global user.email "github-actions@github.com"
+          git fetch --tags
           if git tag -l | grep -q "$TAG_NAME"; then
             echo "$TAG_NAME は既に存在しています。タグの作成をスキップします。"
           else
