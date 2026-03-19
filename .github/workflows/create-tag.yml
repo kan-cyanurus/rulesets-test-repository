@@ -16,7 +16,7 @@ jobs:
 
       - name: Set Tag Name
         run: |
-          TAG_NAME="${GITHUB_REF_NAME#mains/}"
+          TAG_NAME="${GITHUB_REF_NAME#main/}"
           echo "TAG_NAME=$TAG_NAME" >> $GITHUB_ENV
 
       - name: Create Tag
