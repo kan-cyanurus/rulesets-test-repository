@@ -3,7 +3,7 @@ name: Create Tag on Release Branch
 on:
   pull_request:
     branches:
-      - 'releases/**'
+      - release
     types:
       - closed
 
