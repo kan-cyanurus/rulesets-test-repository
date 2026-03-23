@@ -21,8 +21,9 @@ jobs:
 
       - name: Set Tag Name
         run: |
-          TAG_NAME="${GITHUB_HEAD_REF#releases/}"
-          echo "TAG_NAME=$TAG_NAME" >> $GITHUB_ENV
+            SHORT_SHA=$(git rev-parse HEAD | cut -c1-7)
+            TAG_NAME="${GITHUB_HEAD_REF#releases/}-$SHORT_SHA"
+            echo "TAG_NAME=$TAG_NAME" >> $GITHUB_ENV
 
       - name: Create Tag
         run: |
