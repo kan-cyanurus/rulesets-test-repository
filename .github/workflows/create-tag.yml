@@ -21,9 +21,9 @@ jobs:
 
       - name: Set Tag Name
         run: |
-          PR_NUMBER="${{ github.event.pull_request.number }}"
-          SHORT_SHA=$(git rev-parse HEAD | cut -c1-7)
-          TAG_NAME="${GITHUB_HEAD_REF#releases/}-#${PR_NUMBER}-$SHORT_SHA"
+          TAG_NAME="${GITHUB_HEAD_REF#releases/}"
+          echo "TAG_NAME=$TAG_NAME"
+          echo "TAG_NAME=$TAG_NAME" >> $GITHUB_ENV
 
       - name: Create Tag
         run: |
