@@ -20,7 +20,7 @@ permissions:
 
 # 同じブランチ内で同時実行制御の設定
 concurrency:
-  group: lambda-deploy-${{ github.ref_name }}
+  group: lambda-${{ github.ref_name }}
   cancel-in-progress: false
 
 jobs:
