@@ -1,28 +1,28 @@
-name: test
-
-on:
-  pull_request:
-    branches:
-      - main
-
-jobs:
-  check1:
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: dorny/paths-filter@v3
-        id: changes
-        with:
-          filters: |
-            migration:
-              - 'migration/**'
-        
-      - name: check
-        id: check
-        run: |
-          echo "should_run=${{ !contains(github.event.pull_request.title, 'Revert') && steps.changes.outputs.migration }}" >> "$GITHUB_OUTPUT"
-
-      - name: Work
-        if: steps.check.outputs.should_run == 'true'
-        run: |
-          echo "Workを実行します"
+# name: test
+# 
+# on:
+#   pull_request:
+#     branches:
+#       - main
+# 
+# jobs:
+#   check1:
+#     runs-on: ubuntu-latest
+# 
+#     steps:
+#       - uses: dorny/paths-filter@v3
+#         id: changes
+#         with:
+#           filters: |
+#             migration:
+#               - 'migration/**'
+#         
+#       - name: check
+#         id: check
+#         run: |
+#           echo "should_run=${{ !contains(github.event.pull_request.title, 'Revert') && steps.changes.outputs.migration }}" >> "$GITHUB_OUTPUT"
+# 
+#       - name: Work
+#         if: steps.check.outputs.should_run == 'true'
+#         run: |
+#           echo "Workを実行します"
