@@ -1,0 +1,188 @@
+name: Layer Changed Lambdas
+
+on:
+  push:
+    branches:
+      - develop
+      - release
+      - main
+    paths:
+      # LambdaLayerのディレクトリパターン
+      - 'test1-layer-hogehoge/**'
+      - 'test2-layer-hogehoge/**'
+
+env:
+  AWS_REGION: ${{ vars.APP_REGION }}
+  REF_NAME: ${{ github.ref_name }}
+  RUNTIME_PYTHON: ${{ vars.RUNTIME_PYTHON }}
+  RUNTIME_NODE: ${{ vars.RUNTIME_NODE }}
+  FUNC_LIST_NODE: |
+    test1-function
+  FUNC_LIST_LIBRARY: |
+    test2-function
+    test3-function
+    test4-function
+
+permissions:
+  id-token: write # OIDC（OpenID Connect）による認証情報の発行を許可
+  contents: read # リポジトリの内容を読み取る権限を付与
+
+# 同じブランチ内で同時実行制御の設定(Lamda-deployとLambda-layerの同時実行防止)
+concurrency:
+  group: lambda-${{ github.ref_name }}
+  cancel-in-progress: false
+
+jobs:
+  detect-changes:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    if: ${{ github.ref_name == 'develop' || github.ref_name == 'release' || github.ref_name == 'main' }}
+    outputs:
+      changed: ${{ steps.filter.outputs.changes }}
+      oidc_role: ${{ steps.set_oidc_role.outputs.oidc_role }}
+    steps:
+      - uses: actions/checkout@v4
+
+      # 差分検知を実行
+      - id: filter
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            test1-layer-hogehoge:
+              - 'test1-layer-hogehoge/**/*'
+            test2-layer-hogehoge:
+              - 'test2-layer-hogehoge/**/*'
+
+      # OIDC_ROLEの設定
+      - name: Set OIDC_ROLE
+        id: set_oidc_role
+        run: |
+          if [ "$REF_NAME" = "develop" ]; then
+            echo "oidc_role=${{ vars.OIDC_ROLE_DEV }}" >> $GITHUB_OUTPUT
+          elif [ "$REF_NAME" = "release" ]; then
+            echo "oidc_role=${{ vars.OIDC_ROLE_STG }}" >> $GITHUB_OUTPUT
+          elif [ "$REF_NAME" = "main" ]; then
+            echo "oidc_role=${{ vars.OIDC_ROLE_PRD }}" >> $GITHUB_OUTPUT
+          else
+            echo "oidc_role=" >> $GITHUB_OUTPUT
+          fi
+
+  lambda-layer:
+    needs: detect-changes
+    if: ${{ needs.detect-changes.outputs.changed != '[]' && needs.detect-changes.outputs.changed != '' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    strategy:
+      matrix:
+        layer: ${{ fromJson(needs.detect-changes.outputs.changed) }}
+      max-parallel: 1
+    env:
+      LAYER_NAME: ${{ matrix.layer }}
+      OIDC_ROLE: ${{ needs.detect-changes.outputs.oidc_role }}
+    steps:
+      - uses: actions/checkout@v4
+
+      # OIDCを使用してAWS認証情報を設定
+#      - name: Configure AWS credentials (OIDC)
+#        uses: aws-actions/configure-aws-credentials@v4
+#        with:
+#          role-to-assume: ${{ env.OIDC_ROLE }}
+#          aws-region: ${{ env.AWS_REGION }}
+          role-session-name: github-actions-distribute-lambda-layer
+
+      # LambdaLayerのソースコードをzip化
+      - name: Zip LambdaLayer source
+        run: |
+          cd $LAYER_NAME
+          zip -r ../${LAYER_NAME}.zip ./*
+          cd ..
+
+      # LambdaLayerのデプロイとアタッチ処理を実行
+      - name: Deploy & Attach LambdaLayer (${{ matrix.layer }})
+        run: |
+          # Layerのランタイム・関数リストを設定
+          if [ "$LAYER_NAME" = "test2-layer-hogehoge" ]; then
+            RUN_TIME=$RUNTIME_PYTHON
+            FUNC_LIST=$FUNC_LIST_LIBRARY
+          elif [ "$LAYER_NAME" = "test1-layer-hogehoge" ]; then
+            RUN_TIME=$RUNTIME_NODE
+            FUNC_LIST=$FUNC_LIST_NODE
+          else
+            echo "Error: Unknown layer name $LAYER_NAME"
+            exit 1
+          fi
+
+
+          # ① パブリッシュ前のAWS最新バージョンのハッシュ値とARNを取得
+          PRE_HASH=$(aws lambda list-layer-versions --layer-name $LAYER_NAME --max-items 1 --query 'LayerVersions[0].Content.CodeSha256' --output text 2>/dev/null || echo "NONE")
+          PRE_ARN=$(aws lambda list-layer-versions --layer-name $LAYER_NAME --max-items 1 --query 'LayerVersions[0].LayerVersionArn' --output text 2>/dev/null || echo "")
+          echo "Pre-publish Hash:  $PRE_HASH"
+          echo "Pre Layer ARN:     $PRE_ARN"
+
+          # ② zipファイルのハッシュ値を計算
+          LOCAL_HASH=$(openssl dgst -sha256 -binary "${LAYER_NAME}.zip" | openssl base64 -A)
+          echo "Local zip Hash: $LOCAL_HASH"
+
+          # ③ ハッシュ値が同じならパブリッシュをスキップし、既存ARNを利用
+          if [ "$PRE_HASH" = "$LOCAL_HASH" ] && [ "$PRE_ARN" != "" ]; then
+            echo "zip内容に変更がないためパブリッシュをスキップします。"
+            NEW_LAYER_ARN=$PRE_ARN
+            POST_HASH=$PRE_HASH
+          else
+            # ④ Layerをpublishする
+            PUBLISH_OUTPUT=$(aws lambda publish-layer-version \
+              --layer-name "$LAYER_NAME" \
+              --zip-file fileb://"${LAYER_NAME}.zip" \
+              --compatible-runtimes "$RUN_TIME")
+            # ⑤ publish後のLayer情報の取得
+            NEW_LAYER_ARN=$(echo $PUBLISH_OUTPUT | jq -r '.LayerVersionArn')
+            POST_HASH=$(echo $PUBLISH_OUTPUT | jq -r '.Content.CodeSha256')
+            echo "Post-publish Hash: $POST_HASH"
+            echo "New Layer ARN:     $NEW_LAYER_ARN"
+            if [ "$PRE_HASH" = "$POST_HASH" ]; then
+              echo "Layerの内容に変更がないか、あるいはパブリッシュによる更新が正しく行われませんでした。"
+            fi
+          fi
+
+          # ⑥ Layerを各関数にアタッチする
+          for FUNC in $FUNC_LIST; do
+            # ① 現在の関数に設定されている全LayerのARNを取得
+            CURRENT_LAYERS=$(aws lambda get-function-configuration \
+              --function-name $FUNC \
+              --query 'Layers[].Arn' \
+              --output text)
+
+            # ② 既に同じARNがアタッチされていればスキップ
+            if [[ "$CURRENT_LAYERS" == *"$NEW_LAYER_ARN"* ]]; then
+              echo "スキップ: $FUNC には既に新しいLayerのARNがアタッチされています。"
+              echo "アタッチ済みARN: $NEW_LAYER_ARN"
+              continue
+            fi
+
+            # ③ Layerを関数にアタッチ
+            aws lambda update-function-configuration \
+              --function-name "$FUNC" \
+              --layers "$NEW_LAYER_ARN"
+
+            # ④ AWS側の更新処理が完了するまで待機
+            echo "Waiting for update to complete..."
+            aws lambda wait function-updated --function-name $FUNC
+
+            # ⑤ 再度設定を取得して検証
+            CURRENT_LAYERS=$(aws lambda get-function-configuration \
+              --function-name $FUNC \
+              --query 'Layers[].Arn' \
+              --output text)
+
+            # ⑥ 期待するARNが現在の設定に含まれていることを確認
+            if [[ "$CURRENT_LAYERS" == *"$NEW_LAYER_ARN"* ]]; then
+              echo "成功: $FUNC に新しいLayerバージョンが正常にアタッチされました。"
+              echo "アタッチ済みARN: $NEW_LAYER_ARN"
+            else
+              echo "エラー: $FUNC へのLayerアタッチの確認に失敗しました。"
+              echo "期待していたARN: $NEW_LAYER_ARN"
+              echo "実際の現在の設定: $CURRENT_LAYERS"
+              exit 1
+            fi
+
+          done
