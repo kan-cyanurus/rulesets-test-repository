@@ -8,8 +8,8 @@ on:
       - main
     paths:
       # Lambda関数のディレクトリパターン
-      - 'test1-*/**'
-      - 'test2-*/**'
+      - 'test1-hogehoge/**'
+      - 'test2-hogehoge/**'
 
 env:
   REF_NAME: ${{ github.ref_name }}
